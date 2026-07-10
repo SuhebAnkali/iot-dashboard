@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-base text-slate-100 font-body transition-colors duration-300;
+}
+
+body.light {
+  @apply bg-base-light text-slate-800;
+}
+
+/* Instrument-panel glass card */
+.panel-card {
+  @apply relative rounded-2xl border border-panel-border bg-panel/70 backdrop-blur-md shadow-glass;
+}
+body.light .panel-card {
+  @apply border-panel-borderLight bg-white/70 shadow-none;
+}
+
+/* Small-caps gauge-style label, e.g. "TANK LEVEL" */
+.gauge-label {
+  @apply text-[11px] tracking-[0.18em] uppercase text-signal-steel font-medium;
+}
+
+/* Focus visibility for accessibility */
+:focus-visible {
+  outline: 2px solid #1FD1C1;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Thin scrollbars to fit the control-room aesthetic */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #232B3D; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
