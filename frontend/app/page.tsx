@@ -326,7 +326,7 @@ export default function Home() {
           <p>
             Water Distribution & Street Light Automation System
           </p>
-          <p>Developed by Suheb Ankali</p>
+          <p>Developed by WaterBabies</p>
         </div>
       </footer>
     </main>
