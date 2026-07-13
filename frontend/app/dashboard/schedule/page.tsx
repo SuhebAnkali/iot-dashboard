@@ -22,7 +22,11 @@ interface Schedule {
 
 export default function SchedulePage() {
   const { isOperator } = useAuth();
-  const { connected } = useLiveSocket();
+  const { status, connected } = useLiveSocket();
+
+   const hardwareOnline =
+    status?.deviceOnline === true ||
+    status?.device_online === true;
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [form, setForm] = useState({ wardNumber: 1, startTime: '06:00', endTime: '07:00', quotaMl: 1500 });
   const [saving, setSaving] = useState(false);
@@ -76,8 +80,12 @@ export default function SchedulePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-base">
-        <Navbar connected={connected} />
-        <main className="mx-auto max-w-5xl px-6 py-8">
+        <Navbar
+              connected={connected}
+              hardwareOnline={hardwareOnline}
+/>
+        <main className="min-h-screen px-4 pb-8 pt-24 sm:px-6 lg:ml-56 lg:px-6">
+         <div className="mx-auto max-w-[1600px]">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-display text-2xl font-semibold text-white">Distribution Schedule</h2>
@@ -167,6 +175,7 @@ export default function SchedulePage() {
                 )}
               </tbody>
             </table>
+          </div>
           </div>
         </main>
       </div>

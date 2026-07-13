@@ -53,7 +53,13 @@ router.get(
   asyncHandler(async (req, res) => {
     try {
       const status = await esp32.getStatus();
-      return res.json(status);
+
+      return res.json({
+        ...status,
+        deviceOnline: true,
+        device_online: true,
+        stale: false,
+      });
     } catch (err) {
       // Use the latest database record while the ESP32 is offline.
       const [rows] = await pool.query(
@@ -68,6 +74,8 @@ router.get(
       if (rows.length > 0) {
         return res.json({
           ...rows[0],
+          deviceOnline: false,
+          device_online: false,
           stale: true,
           error:
             'Device unreachable, showing last known reading.',
@@ -75,6 +83,9 @@ router.get(
       }
 
       return res.status(503).json({
+        deviceOnline: false,
+        device_online: false,
+        stale: true,
         error:
           'Device unreachable and no historical data is available.',
       });

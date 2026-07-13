@@ -173,10 +173,8 @@ export default function DashboardPage() {
       live?.dryTank ?? live?.dry_tank ?? false;
 
     const deviceOnline =
-      live?.deviceOnline ??
-      live?.device_online ??
-      connected;
-
+      live?.deviceOnline === true ||
+      live?.device_online === true;
     return {
       tankLevelMl,
       tankPercentage,
@@ -200,10 +198,15 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-base">
-        <Navbar connected={connected} />
+ <div className="min-h-screen bg-base">
+  <Navbar
+  connected={connected}
+  hardwareOnline={dashboardData.deviceOnline}
+/>
 
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+  <main className="min-h-screen px-4 pb-8 pt-24 sm:px-6 lg:ml-56 lg:px-6">
+    <div className="mx-auto max-w-[1600px]">
+        
           <DashboardHeader
             isOperator={isOperator}
             userName={user?.name}
@@ -435,6 +438,7 @@ export default function DashboardPage() {
               </div>
             </motion.section>
           )}
+          </div>
         </main>
       </div>
     </ProtectedRoute>
