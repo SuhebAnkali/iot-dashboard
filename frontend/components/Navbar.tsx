@@ -13,17 +13,17 @@ interface NavbarProps {
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: DashboardIcon },
-  { label: 'Water Distribution', href: '/dashboard#water', icon: WaterIcon },
-  { label: 'Street Lighting', href: '/dashboard#lighting', icon: LightIcon },
+  { label: 'Water Distribution', href: '/dashboard/water', icon: WaterIcon },
+  { label: 'Street Lighting', href: '/dashboard/lighting', icon: LightIcon },
   { label: 'Schedules', href: '/dashboard/schedule', icon: CalendarIcon },
-  { label: 'Reports', href: '/dashboard#reports', icon: ReportIcon },
-  { label: 'Alerts', href: '/dashboard#alerts', icon: AlertIcon },
+  { label: 'Reports', href: '/dashboard/reports', icon: ReportIcon },
+  { label: 'Alerts', href: '/dashboard/alerts', icon: AlertIcon },
 ];
 
 const managementLinks = [
-  { label: 'Manual Control', href: '/dashboard#control', icon: ControlIcon },
-  { label: 'Devices', href: '/dashboard#devices', icon: DeviceIcon },
-  { label: 'Users', href: '/dashboard#users', icon: UsersIcon },
+  { label: 'Manual Control', href: '/dashboard/control', icon: ControlIcon },
+  { label: 'Devices', href: '/dashboard/devices', icon: DeviceIcon },
+  { label: 'Users', href: '/dashboard/users', icon: UsersIcon },
 ];
 
 const systemLinks = [
