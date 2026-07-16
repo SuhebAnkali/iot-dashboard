@@ -1,8 +1,17 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 const { pool } = require('../config/db');
-const { authenticate, requireRole } = require('../middleware/auth');
+const {
+  authenticate,
+  requireRole,
+} = require('../middleware/auth');
+
+const {
+  logActivity,
+  getRequestIp,
+} = require('../services/activity.service');
 
 const router = express.Router();
 
@@ -10,7 +19,7 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
-    const { password } = req.body;
+    const password = String(req.body.password || '');
 
     if (!email || !password) {
       return res.status(400).json({
@@ -19,15 +28,36 @@ router.post('/login', async (req, res) => {
     }
 
     const [rows] = await pool.query(
-      `SELECT id, name, email, password_hash, role, is_active
+      `SELECT
+         id,
+         name,
+         email,
+         password_hash,
+         role,
+         is_active
        FROM users
-       WHERE email = ?`,
+       WHERE email = ?
+       LIMIT 1`,
       [email]
     );
 
     const user = rows[0];
 
     if (!user || !user.is_active) {
+      await logActivity({
+        actorName: email || 'Unknown user',
+        actorRole: 'unknown',
+        actionType: 'login_failed',
+        category: 'authentication',
+        description:
+          'Login attempt failed because the account was invalid or inactive.',
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'user_account',
+        targetId: email || null,
+        ipAddress: getRequestIp(req),
+      });
+
       return res.status(401).json({
         error: 'Invalid credentials.',
       });
@@ -39,6 +69,22 @@ router.post('/login', async (req, res) => {
     );
 
     if (!validPassword) {
+      await logActivity({
+        user: {
+          id: user.id,
+          name: user.name,
+          role: user.role,
+        },
+        actionType: 'login_failed',
+        category: 'authentication',
+        description: `${user.name} entered an invalid password.`,
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'user',
+        targetId: user.id,
+        ipAddress: getRequestIp(req),
+      });
+
       return res.status(401).json({
         error: 'Invalid credentials.',
       });
@@ -58,9 +104,30 @@ router.post('/login', async (req, res) => {
     );
 
     await pool.query(
-      'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?',
+      `UPDATE users
+       SET last_login_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
       [user.id]
     );
+
+    await logActivity({
+      user: {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+      },
+      actionType: 'user_login',
+      category: 'authentication',
+      description: `${user.name} signed in successfully.`,
+      severity: 'success',
+      result: 'success',
+      targetType: 'user',
+      targetId: user.id,
+      metadata: {
+        email: user.email,
+      },
+      ipAddress: getRequestIp(req),
+    });
 
     return res.json({
       token,
@@ -73,6 +140,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('[Auth] Login error:', err);
+
     return res.status(500).json({
       error: 'Login failed.',
     });
@@ -81,7 +149,9 @@ router.post('/login', async (req, res) => {
 
 // GET /api/auth/me
 router.get('/me', authenticate, (req, res) => {
-  res.json({ user: req.user });
+  return res.json({
+    user: req.user,
+  });
 });
 
 // POST /api/auth/register
@@ -94,7 +164,8 @@ router.post(
     try {
       const name = req.body.name?.trim();
       const email = req.body.email?.trim().toLowerCase();
-      const { password, role } = req.body;
+      const password = String(req.body.password || '');
+      const role = req.body.role;
 
       if (
         !name ||
@@ -104,13 +175,14 @@ router.post(
       ) {
         return res.status(400).json({
           error:
-            'name, email, password, and a valid role are required.',
+            'Name, email, password, and a valid role are required.',
         });
       }
 
       if (password.length < 8) {
         return res.status(400).json({
-          error: 'Password must contain at least 8 characters.',
+          error:
+            'Password must contain at least 8 characters.',
         });
       }
 
@@ -118,18 +190,67 @@ router.post(
 
       const [result] = await pool.query(
         `INSERT INTO users
-          (name, email, password_hash, role)
-         VALUES (?, ?, ?, ?)
-         RETURNING id, name, email, role`,
-        [name, email, passwordHash, role]
+          (
+            name,
+            email,
+            password_hash,
+            role,
+            is_active
+          )
+         VALUES (?, ?, ?, ?, TRUE)
+         RETURNING
+           id,
+           name,
+           email,
+           role,
+           is_active,
+           created_at`,
+        [
+          name,
+          email,
+          passwordHash,
+          role,
+        ]
       );
 
       const createdUser = result.rows[0];
 
+      await logActivity({
+        user: req.user,
+        actionType: 'user_created',
+        category: 'user',
+        description:
+          `${req.user.name} created a ${role} account for ${name}.`,
+        severity: 'success',
+        result: 'success',
+        targetType: 'user',
+        targetId: createdUser.id,
+        metadata: {
+          createdUserId: createdUser.id,
+          createdUserName: createdUser.name,
+          createdUserEmail: createdUser.email,
+          createdUserRole: createdUser.role,
+        },
+        ipAddress: getRequestIp(req),
+      });
+
       return res.status(201).json(createdUser);
     } catch (err) {
-      // PostgreSQL unique-constraint violation
       if (err.code === '23505') {
+        await logActivity({
+          user: req.user,
+          actionType: 'user_creation_failed',
+          category: 'user',
+          description:
+            'User creation failed because the email already exists.',
+          severity: 'warning',
+          result: 'failed',
+          targetType: 'user_email',
+          targetId:
+            req.body.email?.trim().toLowerCase() || null,
+          ipAddress: getRequestIp(req),
+        });
+
         return res.status(409).json({
           error: 'A user with this email already exists.',
         });
@@ -137,10 +258,28 @@ router.post(
 
       console.error('[Auth] Registration error:', err);
 
+      await logActivity({
+        user: req.user,
+        actionType: 'user_creation_failed',
+        category: 'user',
+        description:
+          'User account creation failed because of an internal error.',
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'user_email',
+        targetId:
+          req.body.email?.trim().toLowerCase() || null,
+        metadata: {
+          error: err.message,
+        },
+        ipAddress: getRequestIp(req),
+      });
+
       return res.status(500).json({
         error: 'Registration failed.',
       });
     }
   }
 );
+
 module.exports = router;

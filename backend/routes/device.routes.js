@@ -1,13 +1,24 @@
 const express = require('express');
+
 const { pool } = require('../config/db');
-const { authenticate, requireRole } = require('../middleware/auth');
+const {
+  authenticate,
+  requireRole,
+} = require('../middleware/auth');
+
 const esp32 = require('../services/esp32.service');
 
+const {
+  logActivity,
+  getRequestIp,
+} = require('../services/activity.service');
+
 const router = express.Router();
+
 const DEVICE_ID = 1;
 
 /**
- * Prevents rejected async operations from crashing the Node.js server.
+ * Prevents rejected async operations from crashing the server.
  */
 function asyncHandler(handler) {
   return (req, res, next) => {
@@ -15,6 +26,9 @@ function asyncHandler(handler) {
   };
 }
 
+/**
+ * Existing control-action audit table.
+ */
 async function logAction(
   userId,
   actionType,
@@ -44,6 +58,10 @@ async function logAction(
   );
 }
 
+// ------------------------------------------------------------
+// Device information
+// ------------------------------------------------------------
+
 // GET /api/device/status
 // User + Operator
 router.get(
@@ -61,7 +79,6 @@ router.get(
         stale: false,
       });
     } catch (err) {
-      // Use the latest database record while the ESP32 is offline.
       const [rows] = await pool.query(
         `SELECT *
          FROM sensor_logs
@@ -101,12 +118,15 @@ router.get(
   requireRole('user', 'operator'),
   asyncHandler(async (req, res) => {
     const requestedHours = Number(req.query.hours);
+
     const hours = Math.min(
       Math.max(
-        Number.isFinite(requestedHours) ? requestedHours : 24,
+        Number.isFinite(requestedHours)
+          ? requestedHours
+          : 24,
         1
       ),
-      168
+      720
     );
 
     const [rows] = await pool.query(
@@ -116,6 +136,7 @@ router.get(
          ward1_ml,
          ward2_ml,
          ward3_ml,
+         active_ward,
          street_light,
          leak_detected,
          dry_tank,
@@ -163,11 +184,45 @@ router.get(
        FROM alerts
        WHERE device_id = ?
        ORDER BY created_at DESC
-       LIMIT 50`,
+       LIMIT 100`,
       [DEVICE_ID]
     );
 
     return res.json(rows);
+  })
+);
+
+// GET /api/device/details
+// User + Operator
+router.get(
+  '/details',
+  authenticate,
+  requireRole('user', 'operator'),
+  asyncHandler(async (req, res) => {
+    const [rows] = await pool.query(
+      `SELECT
+         id,
+         name,
+         device_type,
+         location,
+         ip_address,
+         firmware_version,
+         is_online,
+         last_seen_at,
+         created_at
+       FROM devices
+       WHERE id = ?
+       LIMIT 1`,
+      [DEVICE_ID]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Device record not found.',
+      });
+    }
+
+    return res.json(rows[0]);
   })
 );
 
@@ -183,7 +238,7 @@ router.post(
   requireRole('operator'),
   asyncHandler(async (req, res) => {
     const ward = Number(req.body.ward);
-    const { state } = req.body;
+    const state = req.body.state;
 
     if (![1, 2, 3].includes(ward)) {
       return res.status(400).json({
@@ -202,7 +257,10 @@ router.post(
       : 'valve_close';
 
     try {
-      await esp32.setValve(ward, state);
+      const response = await esp32.setValve(
+        ward,
+        state
+      );
 
       await logAction(
         req.user.id,
@@ -211,10 +269,32 @@ router.post(
         'success'
       );
 
+      await logActivity({
+        user: req.user,
+        actionType: state
+          ? 'valve_opened'
+          : 'valve_closed',
+        category: 'water',
+        description: `Ward ${ward} valve was ${
+          state ? 'opened' : 'closed'
+        } manually by ${req.user.name}.`,
+        severity: 'success',
+        result: 'success',
+        targetType: 'ward_valve',
+        targetId: ward,
+        metadata: {
+          ward,
+          state,
+          esp32Response: response ?? null,
+        },
+        ipAddress: getRequestIp(req),
+      });
+
       return res.json({
         success: true,
         ward,
         state,
+        deviceResponse: response,
       });
     } catch (err) {
       await logAction(
@@ -223,7 +303,33 @@ router.post(
         ward,
         'failed',
         err.message
-      );
+      ).catch((logError) => {
+        console.error(
+          '[Device] Failed to write control action:',
+          logError.message
+        );
+      });
+
+      await logActivity({
+        user: req.user,
+        actionType: state
+          ? 'valve_open_failed'
+          : 'valve_close_failed',
+        category: 'water',
+        description: `Failed to ${
+          state ? 'open' : 'close'
+        } Ward ${ward} valve.`,
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'ward_valve',
+        targetId: ward,
+        metadata: {
+          ward,
+          state,
+          error: err.message,
+        },
+        ipAddress: getRequestIp(req),
+      });
 
       return res.status(502).json({
         error: 'Failed to reach ESP32 device.',
@@ -239,18 +345,19 @@ router.post(
   authenticate,
   requireRole('operator'),
   asyncHandler(async (req, res) => {
-    const { mode } = req.body;
+    const mode = req.body.mode;
 
     if (!['on', 'off', 'auto'].includes(mode)) {
       return res.status(400).json({
-        error: "mode must be 'on', 'off', or 'auto'.",
+        error:
+          "mode must be 'on', 'off', or 'auto'.",
       });
     }
 
     const actionType = `light_${mode}`;
 
     try {
-      await esp32.setLight(mode);
+      const response = await esp32.setLight(mode);
 
       await logAction(
         req.user.id,
@@ -259,9 +366,27 @@ router.post(
         'success'
       );
 
+      await logActivity({
+        user: req.user,
+        actionType: `street_light_${mode}`,
+        category: 'lighting',
+        description:
+          `Street-light mode was changed to ${mode.toUpperCase()} by ${req.user.name}.`,
+        severity: 'success',
+        result: 'success',
+        targetType: 'street_light',
+        targetId: 'main',
+        metadata: {
+          mode,
+          esp32Response: response ?? null,
+        },
+        ipAddress: getRequestIp(req),
+      });
+
       return res.json({
         success: true,
         mode,
+        deviceResponse: response,
       });
     } catch (err) {
       await logAction(
@@ -270,7 +395,29 @@ router.post(
         null,
         'failed',
         err.message
-      );
+      ).catch((logError) => {
+        console.error(
+          '[Device] Failed to write control action:',
+          logError.message
+        );
+      });
+
+      await logActivity({
+        user: req.user,
+        actionType: `street_light_${mode}_failed`,
+        category: 'lighting',
+        description:
+          `Failed to change street-light mode to ${mode.toUpperCase()}.`,
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'street_light',
+        targetId: 'main',
+        metadata: {
+          mode,
+          error: err.message,
+        },
+        ipAddress: getRequestIp(req),
+      });
 
       return res.status(502).json({
         error: 'Failed to reach ESP32 device.',
@@ -286,7 +433,8 @@ router.post(
   requireRole('operator'),
   asyncHandler(async (req, res) => {
     try {
-      await esp32.refillTank();
+      const response =
+        await esp32.refillTank();
 
       await logAction(
         req.user.id,
@@ -295,9 +443,28 @@ router.post(
         'success'
       );
 
+      await logActivity({
+        user: req.user,
+        actionType: 'tank_refilled',
+        category: 'water',
+        description:
+          `The main tank quantity was reset to full capacity by ${req.user.name}.`,
+        severity: 'success',
+        result: 'success',
+        targetType: 'tank',
+        targetId: 'main',
+        metadata: {
+          capacityMl: 5000,
+          esp32Response: response ?? null,
+        },
+        ipAddress: getRequestIp(req),
+      });
+
       return res.json({
         success: true,
-        message: 'Tank refilled to full capacity.',
+        message:
+          'Tank refilled to full capacity.',
+        deviceResponse: response,
       });
     } catch (err) {
       await logAction(
@@ -306,7 +473,28 @@ router.post(
         null,
         'failed',
         err.message
-      );
+      ).catch((logError) => {
+        console.error(
+          '[Device] Failed to write control action:',
+          logError.message
+        );
+      });
+
+      await logActivity({
+        user: req.user,
+        actionType: 'tank_refill_failed',
+        category: 'water',
+        description:
+          'Failed to refill the main tank because the ESP32 was unreachable.',
+        severity: 'warning',
+        result: 'failed',
+        targetType: 'tank',
+        targetId: 'main',
+        metadata: {
+          error: err.message,
+        },
+        ipAddress: getRequestIp(req),
+      });
 
       return res.status(502).json({
         error: 'Failed to reach ESP32 device.',

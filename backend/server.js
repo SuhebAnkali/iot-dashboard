@@ -14,6 +14,7 @@ const deviceRoutes = require('./routes/device.routes');
 const scheduleRoutes = require('./routes/schedule.routes');
 const exportRoutes = require('./routes/export.routes');
 const userRoutes = require('./routes/user.routes');
+const activityRoutes = require('./routes/activity.routes');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/device', deviceRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/activity', activityRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ error: 'Route not found.' }));

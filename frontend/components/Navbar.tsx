@@ -27,7 +27,7 @@ const managementLinks = [
 ];
 
 const systemLinks = [
-  { label: 'Activity Logs', href: '/dashboard#activity', icon: LogIcon },
+  { label: 'Activity Logs', href: '/dashboard/activity', icon: LogIcon },
   { label: 'Settings', href: '/dashboard#settings', icon: SettingsIcon },
   { label: 'Profile', href: '/dashboard#profile', icon: ProfileIcon },
 ];
