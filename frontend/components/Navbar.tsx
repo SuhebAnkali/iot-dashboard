@@ -28,8 +28,7 @@ const managementLinks = [
 
 const systemLinks = [
   { label: 'Activity Logs', href: '/dashboard/activity', icon: LogIcon },
-  { label: 'Settings', href: '/dashboard#settings', icon: SettingsIcon },
-  { label: 'Profile', href: '/dashboard#profile', icon: ProfileIcon },
+  { label: 'Profile', href: '/dashboard/profile', icon: ProfileIcon },
 ];
 
 export default function Navbar({
@@ -41,6 +40,7 @@ export default function Navbar({
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   function isActive(href: string) {
     const route = href.split('#')[0];
@@ -195,41 +195,90 @@ export default function Navbar({
             </div>
           </div>
 
-          <div className="hidden max-w-sm flex-1 md:block">
-            <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-
-              <input
-                type="search"
-                placeholder="Search anything..."
-                className="w-full rounded-xl border border-panel-border bg-black/15 py-2.5 pl-10 pr-16 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-signal-cyan/50"
-              />
-
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-panel-border px-2 py-1 text-[10px] text-slate-500">
-                Ctrl /
-              </span>
-            </div>
-          </div>
-
           <div className="flex items-center gap-2 sm:gap-3">
             <ConnectionBadge connected={connected} />
 
-            <button
-              type="button"
-              className="relative rounded-xl border border-panel-border bg-white/[0.035] p-2.5 text-slate-400 transition hover:border-signal-cyan/40 hover:text-signal-cyan"
-              aria-label="Notifications"
-            >
-              <BellIcon />
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                3
-              </span>
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setNotificationOpen((value) => !value);
+                  setProfileOpen(false);
+                }}
+                className="relative rounded-xl border border-panel-border bg-white/[0.035] p-2.5 text-slate-400 transition hover:border-signal-cyan/40 hover:text-signal-cyan"
+                aria-label="Notifications"
+                aria-expanded={notificationOpen}
+              >
+                <BellIcon />
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  3
+                </span>
+              </button>
+
+              {notificationOpen && (
+                <div className="absolute right-0 z-50 mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-panel-border bg-[#0b1524] shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-panel-border px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">
+                        Notifications
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        3 unread alerts
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setNotificationOpen(false)}
+                      className="rounded-lg p-1.5 text-slate-500 transition hover:bg-white/5 hover:text-white"
+                      aria-label="Close notifications"
+                    >
+                      <CloseIcon />
+                    </button>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto p-2">
+                    <NotificationItem
+                      title="Tank level is low"
+                      message="The current water level is below the recommended limit."
+                      time="2 minutes ago"
+                      type="warning"
+                    />
+
+                    <NotificationItem
+                      title="ESP32 is offline"
+                      message="The dashboard cannot communicate with the ESP32 device."
+                      time="5 minutes ago"
+                      type="error"
+                    />
+
+                    <NotificationItem
+                      title="Street lights inactive"
+                      message="Street lighting is currently switched off."
+                      time="10 minutes ago"
+                      type="info"
+                    />
+                  </div>
+
+                  <Link
+                    href="/dashboard/alerts"
+                    onClick={() => setNotificationOpen(false)}
+                    className="block border-t border-panel-border px-4 py-3 text-center text-sm font-semibold text-cyan-300 transition hover:bg-white/[0.035]"
+                  >
+                    View all alerts
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {user && (
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setProfileOpen((value) => !value)}
+                  onClick={() => {
+                    setProfileOpen((value) => !value);
+                    setNotificationOpen(false);
+                  }}
                   className="flex items-center gap-3 rounded-xl border border-transparent px-2 py-1.5 transition hover:border-panel-border hover:bg-white/[0.035]"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 text-sm font-bold text-cyan-300 ring-1 ring-cyan-400/20">
@@ -264,7 +313,7 @@ export default function Navbar({
                     </div>
 
                     <Link
-                      href="/dashboard#profile"
+                      href="/dashboard/profile"
                       onClick={() => setProfileOpen(false)}
                       className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
                     >
@@ -349,6 +398,46 @@ function NavSection({
   );
 }
 
+function NotificationItem({
+  title,
+  message,
+  time,
+  type,
+}: {
+  title: string;
+  message: string;
+  time: string;
+  type: 'warning' | 'error' | 'info';
+}) {
+  const styles = {
+    warning: 'bg-amber-400/10 text-amber-300',
+    error: 'bg-red-400/10 text-red-300',
+    info: 'bg-cyan-400/10 text-cyan-300',
+  };
+
+  return (
+    <div className="flex gap-3 rounded-xl px-3 py-3 transition hover:bg-white/[0.035]">
+      <div
+        className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${styles[type]}`}
+      >
+        <AlertIcon />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-white">{title}</p>
+
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          {message}
+        </p>
+
+        <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-600">
+          {time}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function ConnectionBadge({ connected }: { connected: boolean }) {
   return (
     <div
@@ -425,31 +514,6 @@ function CloseIcon() {
   );
 }
 
-function SearchIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="17"
-      height="17"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <circle
-        cx="11"
-        cy="11"
-        r="7"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="m16.5 16.5 4 4"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 function DashboardIcon() {
   return (
@@ -511,11 +575,6 @@ function LogIcon() {
   );
 }
 
-function SettingsIcon() {
-  return (
-    <SimpleIcon path="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7-3 2-1-2-4-2 1-2-1-.4-3h-5L9 7 7 8 5 7l-2 4 2 1v2l-2 1 2 4 2-1 2 1 .5 2h5l.5-2 2-1 2 1 2-4-2-1v-2Z" />
-  );
-}
 
 function ProfileIcon() {
   return (

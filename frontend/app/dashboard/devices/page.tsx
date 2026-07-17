@@ -445,7 +445,7 @@ function HardwareModules({
       healthy: hardwareOnline,
       icon: '🔌',
       description:
-        'Controls three water valves and one street-light output.',
+        'Controls three water valves.',
     },
     {
       name: 'LDR Module',
