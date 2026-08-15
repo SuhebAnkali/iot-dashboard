@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
 }
 
 html {
@@ -13,7 +13,8 @@ html {
 }
 
 body {
-  @apply bg-base text-slate-100 font-body transition-colors duration-300;
+  @apply bg-base text-slate-100 transition-colors duration-300;
+  font-family: var(--font-body);
 }
 
 body.light {
@@ -65,6 +66,19 @@ body.light header {
 body.light header h1,
 body.light header p {
   color: #1e293b;
+}
+
+/* Optional utility font classes */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 /* Focus visibility */
