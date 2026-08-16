@@ -11,8 +11,11 @@ function asyncHandler(handler) {
   };
 }
 
+// ============================================================
 // GET /api/schedule
-// User and Operator can view schedules.
+// User and Operator can view schedules
+// ============================================================
+
 router.get(
   '/',
   authenticate,
@@ -34,8 +37,11 @@ router.get(
   })
 );
 
+// ============================================================
 // POST /api/schedule
-// Operator only.
+// Operator only
+// ============================================================
+
 router.post(
   '/',
   authenticate,
@@ -44,11 +50,13 @@ router.post(
     const wardNumber = Number(req.body.wardNumber);
     const startTime = req.body.startTime;
     const endTime = req.body.endTime;
+
     const daysMask =
       req.body.daysMask ||
       'MON,TUE,WED,THU,FRI,SAT,SUN';
 
-    const quotaMl = Number(req.body.quotaMl || 1500);
+    const quotaMl =
+      Number(req.body.quotaMl || 1500);
 
     if (
       ![1, 2, 3].includes(wardNumber) ||
@@ -67,7 +75,7 @@ router.post(
       });
     }
 
-    const [result] = await pool.query(
+    const [rows] = await pool.query(
       `INSERT INTO schedules
         (
           device_id,
@@ -101,12 +109,21 @@ router.post(
       ]
     );
 
-    return res.status(201).json(result.rows[0]);
+    if (!rows || rows.length === 0) {
+      return res.status(500).json({
+        error: 'Failed to create schedule.',
+      });
+    }
+
+    return res.status(201).json(rows[0]);
   })
 );
 
+// ============================================================
 // PATCH /api/schedule/:id
-// Operator only.
+// Operator only
+// ============================================================
+
 router.patch(
   '/:id',
   authenticate,
@@ -114,7 +131,10 @@ router.patch(
   asyncHandler(async (req, res) => {
     const scheduleId = Number(req.params.id);
 
-    if (!Number.isInteger(scheduleId) || scheduleId <= 0) {
+    if (
+      !Number.isInteger(scheduleId) ||
+      scheduleId <= 0
+    ) {
       return res.status(400).json({
         error: 'Invalid schedule ID.',
       });
@@ -149,7 +169,10 @@ router.patch(
     if (quotaMl !== undefined) {
       const parsedQuota = Number(quotaMl);
 
-      if (!Number.isFinite(parsedQuota) || parsedQuota <= 0) {
+      if (
+        !Number.isFinite(parsedQuota) ||
+        parsedQuota <= 0
+      ) {
         return res.status(400).json({
           error: 'quotaMl must be a positive number.',
         });
@@ -172,7 +195,7 @@ router.patch(
 
     values.push(scheduleId, DEVICE_ID);
 
-    const [result] = await pool.query(
+    const [rows] = await pool.query(
       `UPDATE schedules
        SET ${fields.join(', ')}
        WHERE id = ?
@@ -191,7 +214,7 @@ router.patch(
       values
     );
 
-    if (result.rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({
         error: 'Schedule not found.',
       });
@@ -199,13 +222,16 @@ router.patch(
 
     return res.json({
       success: true,
-      schedule: result.rows[0],
+      schedule: rows[0],
     });
   })
 );
 
+// ============================================================
 // DELETE /api/schedule/:id
-// Operator only.
+// Operator only
+// ============================================================
+
 router.delete(
   '/:id',
   authenticate,
@@ -213,13 +239,16 @@ router.delete(
   asyncHandler(async (req, res) => {
     const scheduleId = Number(req.params.id);
 
-    if (!Number.isInteger(scheduleId) || scheduleId <= 0) {
+    if (
+      !Number.isInteger(scheduleId) ||
+      scheduleId <= 0
+    ) {
       return res.status(400).json({
         error: 'Invalid schedule ID.',
       });
     }
 
-    const [result] = await pool.query(
+    const [rows] = await pool.query(
       `DELETE FROM schedules
        WHERE id = ?
          AND device_id = ?
@@ -227,7 +256,7 @@ router.delete(
       [scheduleId, DEVICE_ID]
     );
 
-    if (result.rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({
         error: 'Schedule not found.',
       });
@@ -235,7 +264,7 @@ router.delete(
 
     return res.json({
       success: true,
-      deletedId: result.rows[0].id,
+      deletedId: rows[0].id,
     });
   })
 );
