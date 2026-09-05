@@ -1,91 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { 
+  Droplet, 
+  Zap, 
+  ShieldAlert, 
+  ArrowDown, 
+  CheckCircle2, 
+  ArrowRight,
+  Clock,
+  Gauge,
+  Database,
+  TrendingDown,
+  AlertOctagon,
+  PowerOff
+} from 'lucide-react';
 
-const SmartCityScene = dynamic(
-  () => import('@/components/landing/SmartCityScene'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full min-h-[100svh] w-full items-center justify-center bg-[#050b14]">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-            Loading digital twin scene
-          </p>
-        </div>
-      </div>
-    ),
-  }
-);
-
-const heroStats = [
-  { label: 'Realtime nodes', value: '148' },
-  { label: 'Water wards', value: '03' },
-  { label: 'Response visibility', value: '&lt; 3s' },
-];
-
-const previewCards = [
-  {
-    title: 'Live System Preview',
-    text: 'Unified operator visibility across water routing, ward states, streetlight corridors, and infrastructure health.',
-  },
-  {
-    title: 'Water Distribution Intelligence',
-    text: 'Reservoir, elevated tank, pumping, valves, and underground branches framed as one continuous city service layer.',
-  },
-  {
-    title: 'Adaptive Street Lighting',
-    text: 'Ambient-driven lighting zones with corridor emphasis, operational pulse, and premium night-scene presentation.',
-  },
-];
-
-const waterHighlights = [
-  'Reservoir, pump station, tank, and ward network in one scene',
-  'Animated pipeline flow with branch logic for Ward 01, Ward 02, and Ward 03',
-  'Operational markers for valves, service status, and anomaly visibility',
-];
-
-const lightingHighlights = [
-  'Streetlight poles aligned to actual road corridors',
-  'Night-first illumination language with amber intensity control',
-  'Dedicated lighting mode to showcase adaptive city ambience',
-];
-
-const architecture = [
-  {
-    title: 'Field layer',
-    items: ['RTC timing', 'ESP32 control', 'LDR sensing', 'Relay and valve actuation'],
-  },
-  {
-    title: 'Control layer',
-    items: ['Realtime telemetry', 'Alert logic', 'Infrastructure orchestration', 'Command workflows'],
-  },
-  {
-    title: 'Experience layer',
-    items: ['3D digital twin hero', 'Command center access', 'Presentation mode', 'AI anomaly visibility'],
-  },
-];
-
-const aiSignals = [
-  'Pressure irregularity detection across branch pipelines',
-  'Action-oriented leak advisory storytelling instead of generic alerts',
-  'Demo-ready anomaly framing for technical and executive presentations',
-];
-
-const sectionMotion = {
-  initial: { opacity: 0, y: 32 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.7, ease: 'easeOut' },
-};
-
-export default function Home() {
+export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -95,360 +30,411 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#050b14]">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-      </div>
-    );
-  }
-
   return (
-    <main className="min-h-screen overflow-hidden bg-[#050b14] text-white">
-      <section className="relative h-[100svh] min-h-[820px] w-full overflow-hidden">
-        <SmartCityScene />
-
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,11,20,0.88)_0%,rgba(5,11,20,0.6)_30%,rgba(5,11,20,0.18)_62%,rgba(5,11,20,0.65)_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(34,211,238,0.14),transparent_28%),radial-gradient(circle_at_78%_18%,rgba(59,130,246,0.1),transparent_24%),linear-gradient(180deg,rgba(5,11,20,0.12)_0%,rgba(5,11,20,0.2)_55%,rgba(5,11,20,0.9)_100%)]" />
-
-        <header className="absolute inset-x-0 top-0 z-30">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-8">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 backdrop-blur-xl">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
-                <BrandMark />
-              </div>
-              <div>
-                <p className="font-display text-sm font-semibold uppercase tracking-[0.28em] text-slate-200">
-                  RTC SMART CITY
-                </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                  AI-Assisted Urban Infrastructure
-                </p>
-              </div>
-            </div>
-
-            <div className="hidden items-center gap-3 md:flex">
-              <a
-                href="#system-preview"
-                className="pointer-events-auto rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-300"
-              >
-                Preview
-              </a>
-              <Link
-                href="/login"
-                className="pointer-events-auto rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300"
-              >
-                Command Center
-              </Link>
-            </div>
+    <main className="relative min-h-screen bg-[#05070c] text-white selection:bg-cyan-500 selection:text-black">
+      {/* Fixed Minimalist Navbar */}
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 backdrop-blur-xl bg-black/80 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/20 border border-cyan-400/40 text-cyan-300">
+            <Droplet size={18} />
           </div>
-        </header>
+          <div>
+            <p style={{ color: '#ffffff' }} className="font-mono text-xs font-bold tracking-[0.25em]">
+              RTC SMART CITY
+            </p>
+            <p style={{ color: '#67e8f9' }} className="font-mono text-[9px] uppercase tracking-widest">
+              ESP32 &amp; AI Municipal Twin
+            </p>
+          </div>
+        </div>
 
-        <div className="absolute inset-0 z-20 flex items-end">
-          <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 pb-10 pt-28 md:px-8 lg:grid-cols-[1fr_360px] lg:items-end lg:pb-14">
-            <div className="max-w-3xl pointer-events-none">
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-emerald-300 backdrop-blur-xl"
-              >
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Digital twin hero active
-              </motion.div>
+        <nav className="flex items-center gap-6 text-xs font-mono">
+          <a href="#problem" style={{ color: '#e2e8f0' }} className="hidden sm:inline hover:text-cyan-300 transition">
+            01 PROBLEM STATEMENT
+          </a>
+          <a href="#water-solution" style={{ color: '#e2e8f0' }} className="hidden sm:inline hover:text-cyan-300 transition">
+            02 WATER TWIN
+          </a>
+          <a href="#lighting-solution" style={{ color: '#e2e8f0' }} className="hidden sm:inline hover:text-cyan-300 transition">
+            03 ADAPTIVE LIGHTING
+          </a>
+          <Link
+            href="/login"
+            className="rounded-lg bg-cyan-400 px-4 py-2 text-slate-950 font-bold tracking-wider hover:bg-cyan-300 transition shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+          >
+            COMMAND CENTER →
+          </Link>
+        </nav>
+      </header>
 
-              <motion.p
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.65, delay: 0.06, ease: 'easeOut' }}
-                className="mt-8 text-sm font-semibold uppercase tracking-[0.42em] text-cyan-300"
-              >
-                RTC SMART CITY
-              </motion.p>
+      {/* ========================================================== */}
+      {/* SECTION 1: ESTABLISHING HERO */}
+      {/* ========================================================== */}
+      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover filter brightness-[0.7] contrast-[1.1]"
+        >
+          <source src="/videos/city-overview.mp4" type="video/mp4" />
+          <source src="/videos/City Overview.mp4" type="video/mp4" />
+        </video>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
-                className="mt-5 font-display text-4xl font-semibold leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-7xl"
-              >
-                Intelligent Water Distribution &amp; Adaptive Street Lighting
-              </motion.h1>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070c] via-transparent to-black/70 pointer-events-none" />
 
-              <motion.p
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.75, delay: 0.18, ease: 'easeOut' }}
-                className="mt-6 max-w-2xl text-base uppercase tracking-[0.24em] text-slate-300 sm:text-lg"
-              >
-                IoT • AI • Automation • Digital Twin
-              </motion.p>
+        <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-black/85 px-4 py-1.5 text-xs font-mono tracking-widest text-cyan-300 mb-6 backdrop-blur-md shadow-lg"
+          >
+            <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
+            MEGA PROJECT • RTC + ESP32 + AI DIGITAL TWIN
+          </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.75, delay: 0.24, ease: 'easeOut' }}
-                className="pointer-events-auto mt-9 flex flex-col gap-3 sm:flex-row"
-              >
-                <a
-                  href="#system-preview"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-cyan-400/30 hover:bg-white/15"
-                >
-                  EXPLORE THE CITY →
-                </a>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.1 }}
+            className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-white leading-tight"
+          >
+            Intelligent Water Distribution &amp; <br />
+            <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-indigo-300">
+              Adaptive Street Lighting
+            </span>
+          </motion.h1>
 
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300"
-                >
-                  ENTER COMMAND CENTER
-                </Link>
-              </motion.div>
-            </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mx-auto mt-6 max-w-3xl backdrop-blur-md bg-black/85 p-6 rounded-2xl border border-white/20 shadow-2xl"
+          >
+            <p style={{ color: '#ffffff' }} className="text-sm sm:text-base font-normal leading-relaxed">
+              An integrated automation platform that monitors and controls municipal infrastructure in real-time, eliminating operational blind spots through IoT sensors, RTC scheduling, and predictive analytics.
+            </p>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
-              className="pointer-events-none rounded-[28px] border border-white/10 bg-black/25 p-5 backdrop-blur-xl"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 font-mono text-xs"
+          >
+            <Link
+              href="/login"
+              className="w-full sm:w-auto rounded-xl bg-cyan-400 px-8 py-4 font-bold text-slate-950 tracking-wider hover:bg-cyan-300 transition hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]"
             >
-              <p className="text-xs uppercase tracking-[0.26em] text-slate-500">
-                Scene telemetry
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {heroStats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
-                  >
-                    <p className="font-display text-2xl font-semibold text-cyan-300">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              ACCESS DASHBOARD
+            </Link>
+            <a
+              href="#problem"
+              className="w-full sm:w-auto rounded-xl border border-white/30 bg-black/85 backdrop-blur-md px-8 py-4 font-semibold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
+            >
+              PROBLEM STATEMENT <ArrowDown size={14} />
+            </a>
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[10px] tracking-widest pointer-events-none">
+          <span style={{ color: '#cbd5e1' }}>SCROLL DOWN</span>
+          <div className="w-4 h-7 border border-white/40 rounded-full flex justify-center pt-1">
+            <div className="w-1 h-2 bg-cyan-400 rounded-full animate-bounce" />
           </div>
         </div>
       </section>
 
-      <div className="relative bg-[linear-gradient(180deg,#050b14_0%,#07111d_100%)]">
-        <motion.section
-          id="system-preview"
-          {...sectionMotion}
-          className="mx-auto max-w-7xl px-5 py-20 md:px-8"
-        >
-          <SectionHeading
-            eyebrow="Live System Preview"
-            title="A premium support layer beneath the immersive hero"
-            description="After the 3D first impression, the rest of the landing page stays disciplined: concise, industrial, and product-grade."
-          />
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {previewCards.map((card) => (
-              <article
-                key={card.title}
-                className="rounded-[28px] border border-white/10 bg-[#0b1422]/85 p-6 shadow-glass backdrop-blur-xl"
-              >
-                <p className="text-[11px] uppercase tracking-[0.22em] text-cyan-300">
-                  {card.title}
-                </p>
-                <p className="mt-4 text-sm leading-8 text-slate-300">{card.text}</p>
-              </article>
-            ))}
+      {/* ========================================================== */}
+      {/* SECTION 2: THE PROBLEM STATEMENT & REAL-WORLD EVIDENCE */}
+      {/* ========================================================== */}
+      <section id="problem" className="relative py-28 px-6 md:px-12 max-w-7xl mx-auto">
+        <div className="mb-12">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-rose-400 font-bold flex items-center gap-2">
+            <ShieldAlert size={14} /> 01 • PROBLEM STATEMENT — MEGA PROJECT
+          </p>
+          <h2 className="mt-3 text-3xl sm:text-5xl font-light text-white tracking-tight">
+            Traditional Municipal Failures
+          </h2>
+          
+          {/* Problem Quote Container */}
+          <div className="mt-6 rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-950/80 to-black/90 p-6 sm:p-8 backdrop-blur-md shadow-2xl">
+            <p style={{ color: '#ffffff' }} className="text-base sm:text-xl leading-relaxed font-light">
+              "Traditional water distribution and street lighting systems often operate on fixed schedules and manual control, leading to water wastage, leakage, uneven distribution, unnecessary power consumption, and delayed fault detection."
+            </p>
           </div>
-        </motion.section>
+        </div>
 
-        <motion.section {...sectionMotion} className="border-y border-white/10 bg-white/[0.02]">
-          <div className="mx-auto grid max-w-7xl gap-6 px-5 py-20 md:px-8 lg:grid-cols-2">
-            <FeaturePanel
-              eyebrow="Water Distribution Intelligence"
-              title="Hydraulic infrastructure becomes a visible city system"
-              items={waterHighlights}
-              accent="cyan"
-            />
-            <FeaturePanel
-              eyebrow="Adaptive Street Lighting"
-              title="Night operations feel intentional, not decorative"
-              items={lightingHighlights}
-              accent="amber"
-            />
+        {/* Real-World Industry Benchmark Statistics */}
+        <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+          <div className="rounded-2xl border border-rose-500/40 bg-black/80 p-5 backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs">
+              <span style={{ color: '#e2e8f0' }}>WATER TRANSIT LOSS</span>
+              <TrendingDown size={16} className="text-rose-400" />
+            </div>
+            <p className="text-3xl font-bold text-rose-400 mt-2">35% – 45%</p>
+            <p style={{ color: '#ffffff' }} className="text-xs mt-2 font-sans leading-5">
+              Treated municipal water lost to physical leaks and distribution ruptures before reaching consumers.
+            </p>
           </div>
-        </motion.section>
 
-        <motion.section {...sectionMotion} className="mx-auto max-w-7xl px-5 py-20 md:px-8">
-          <SectionHeading
-            eyebrow="System Architecture"
-            title="Hardware, control logic, and operator experience in one product story"
-            description="The landing page now frames your mega project as an integrated smart-city platform instead of a collection of disconnected dashboard cards."
-          />
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {architecture.map((layer, index) => (
-              <article
-                key={layer.title}
-                className="rounded-[28px] border border-white/10 bg-[#0b1422]/85 p-6 shadow-glass backdrop-blur-xl"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 font-display text-sm font-semibold text-cyan-300">
-                    0{index + 1}
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-white">
-                    {layer.title}
-                  </h3>
-                </div>
-                <div className="mt-5 space-y-3">
-                  {layer.items.map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </article>
-            ))}
+          <div className="rounded-2xl border border-amber-500/40 bg-black/80 p-5 backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs">
+              <span style={{ color: '#e2e8f0' }}>DETECTION DELAY</span>
+              <AlertOctagon size={16} className="text-amber-400" />
+            </div>
+            <p className="text-3xl font-bold text-amber-400 mt-2">7 – 21 Days</p>
+            <p style={{ color: '#ffffff' }} className="text-xs mt-2 font-sans leading-5">
+              Typical timeframe to identify underground non-surfacing line leaks without digital sensor telemetry.
+            </p>
           </div>
-        </motion.section>
 
-        <motion.section {...sectionMotion} className="border-y border-white/10 bg-white/[0.02]">
-          <div className="mx-auto max-w-7xl px-5 py-20 md:px-8">
-            <SectionHeading
-              eyebrow="AI Anomaly Detection"
-              title="Operational intelligence is presented as action, not ornament"
-              description="Red remains reserved for genuinely critical city events, while the interface emphasizes explainable infrastructure intelligence."
-            />
+          <div className="rounded-2xl border border-yellow-500/40 bg-black/80 p-5 backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs">
+              <span style={{ color: '#e2e8f0' }}>LIGHTING POWER WASTE</span>
+              <Zap size={16} className="text-yellow-400" />
+            </div>
+            <p className="text-3xl font-bold text-yellow-400 mt-2">25% – 40%</p>
+            <p style={{ color: '#ffffff' }} className="text-xs mt-2 font-sans leading-5">
+              Electricity wasted when fixed-timer streetlights operate at full intensity during dawn and dusk.
+            </p>
+          </div>
 
-            <div className="mt-10 grid gap-4 lg:grid-cols-3">
-              {aiSignals.map((item, index) => (
-                <article
-                  key={item}
-                  className="rounded-[28px] border border-white/10 bg-[#0b1422]/85 p-6 shadow-glass backdrop-blur-xl"
-                >
-                  <div className="mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-cyan-300 via-cyan-400 to-transparent" />
-                  <p className="text-sm leading-8 text-slate-300">{item}</p>
-                  <p className="mt-5 text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                    Signal 0{index + 1}
-                  </p>
-                </article>
-              ))}
+          <div className="rounded-2xl border border-rose-500/40 bg-black/80 p-5 backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs">
+              <span style={{ color: '#e2e8f0' }}>MOTOR CASUALTIES</span>
+              <PowerOff size={16} className="text-rose-400" />
+            </div>
+            <p className="text-3xl font-bold text-rose-400 mt-2">Frequent</p>
+            <p style={{ color: '#ffffff' }} className="text-xs mt-2 font-sans leading-5">
+              Pump motors burn out prematurely due to dry-tank operation and erratic pressure surges.
+            </p>
+          </div>
+        </div>
+
+        {/* Video Card */}
+        <div className="relative rounded-3xl overflow-hidden border border-rose-500/40 bg-[#0c101c] shadow-2xl">
+          <div className="aspect-video w-full max-h-[500px] relative">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover filter brightness-[0.7]"
+            >
+              <source src="/videos/anomaly-detection.mp4" type="video/mp4" />
+              <source src="/videos/Anomaly Detection.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0c101c] via-transparent to-transparent" />
+            
+            <div className="absolute top-6 right-6 font-mono text-xs bg-black/90 border border-rose-500/80 backdrop-blur-md px-4 py-2 rounded-xl text-rose-300 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+              BREACH DETECTED: LATERAL BRANCH WARD 02
             </div>
           </div>
-        </motion.section>
 
-        <motion.section {...sectionMotion} className="mx-auto max-w-5xl px-5 py-20 text-center md:px-8">
-          <div className="rounded-[32px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(8,15,28,0.98))] px-6 py-14 shadow-2xl shadow-cyan-950/20 backdrop-blur-xl sm:px-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">
-              Final CTA
+          <div className="p-8 sm:p-10 grid sm:grid-cols-3 gap-6 border-t border-white/10 font-mono bg-black/85">
+            <div className="bg-white/[0.05] border border-white/10 p-5 rounded-2xl">
+              <p className="text-2xl font-bold text-rose-400">UNEVEN</p>
+              <p style={{ color: '#ffffff' }} className="text-xs uppercase tracking-wider mt-1 font-semibold">Ward Allocation</p>
+              <p style={{ color: '#f1f5f9' }} className="text-xs font-sans mt-2 leading-relaxed">
+                Manual gate valves result in tail-end consumers suffering severe pressure drop and dry outlets.
+              </p>
+            </div>
+            <div className="bg-white/[0.05] border border-white/10 p-5 rounded-2xl">
+              <p className="text-2xl font-bold text-amber-400">BLIND SPOTS</p>
+              <p style={{ color: '#ffffff' }} className="text-xs uppercase tracking-wider mt-1 font-semibold">Fault Isolation</p>
+              <p style={{ color: '#f1f5f9' }} className="text-xs font-sans mt-2 leading-relaxed">
+                Municipal teams rely on physical complaints instead of real-time flow sensors and acoustic monitors.
+              </p>
+            </div>
+            <div className="bg-white/[0.05] border border-white/10 p-5 rounded-2xl">
+              <p className="text-2xl font-bold text-rose-400">INFLEXIBLE</p>
+              <p style={{ color: '#ffffff' }} className="text-xs uppercase tracking-wider mt-1 font-semibold">Grid Scheduling</p>
+              <p style={{ color: '#f1f5f9' }} className="text-xs font-sans mt-2 leading-relaxed">
+                Fixed mechanical timers cannot respond to seasonal daylight shifts or low-traffic night corridors.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================== */}
+      {/* SECTION 3: THE PROPOSED SOLUTION (MEGA PROJECT SUMMARY) */}
+      {/* ========================================================== */}
+      <section id="water-solution" className="relative py-28 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/10">
+        <div className="mb-12">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan-400 font-bold flex items-center gap-2">
+            <Droplet size={14} /> 02 • PROPOSED MEGA PROJECT SOLUTION
+          </p>
+          <h2 className="mt-3 text-3xl sm:text-5xl font-light text-white tracking-tight">
+            IoT &amp; AI-Driven Architecture
+          </h2>
+          
+          <div className="mt-6 rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-950/80 to-black/90 p-6 sm:p-8 backdrop-blur-md shadow-2xl">
+            <p style={{ color: '#ffffff' }} className="text-base sm:text-xl leading-relaxed font-light">
+              "The proposed mega project aims to develop an RTC-Based Intelligent Water Distribution and Adaptive Street Lighting System that uses ESP32, sensors, IoT connectivity, automation, and AI/predictive analytics to monitor and control water distribution and street lighting in real time."
             </p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Enter the command center behind the digital twin
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 className="text-2xl font-light text-white">Full Automation &amp; Centralized Control</h3>
+            <p style={{ color: '#ffffff' }} className="mt-3 text-sm sm:text-base leading-relaxed font-normal">
+              "The system will enable automatic scheduling, water-flow monitoring, leakage detection, dry-tank protection, adaptive lighting, energy conservation, remote monitoring, alerts, and historical data analysis through a centralized dashboard."
+            </p>
+
+            <div className="mt-6 space-y-3 font-mono text-xs">
+              <div className="flex items-center gap-3 bg-white/[0.05] border border-white/15 p-4 rounded-xl">
+                <Clock size={18} className="text-cyan-400 shrink-0" />
+                <span style={{ color: '#ffffff' }}>RTC-Based scheduling manages automated water quotas ward-by-ward.</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/[0.05] border border-white/15 p-4 rounded-xl">
+                <Gauge size={18} className="text-cyan-400 shrink-0" />
+                <span style={{ color: '#ffffff' }}>Continuous YF-S201 flow telemetry &amp; dry-tank shut-off protection.</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/[0.05] border border-white/15 p-4 rounded-xl">
+                <Database size={18} className="text-cyan-400 shrink-0" />
+                <span className="text-cyan-300 font-bold">Live PostgreSQL telemetry synchronization &amp; exportable PDF reports.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden border border-cyan-500/40 shadow-2xl bg-[#060b14]">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.05]"
+            >
+              <source src="/videos/ward-distribution.mp4" type="video/mp4" />
+              <source src="/videos/Ward Distribution.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute bottom-4 left-4 right-4 bg-black/90 backdrop-blur-md border border-white/20 p-4 rounded-xl font-mono text-xs flex justify-between">
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">WATER TANK</p>
+                <p className="text-cyan-300 font-bold">RESERVOIR T-01 (78.4%)</p>
+              </div>
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">BALANCED WARDS</p>
+                <p className="text-emerald-400 font-bold">WARD 01 • 02 • 03</p>
+              </div>
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">FLOW LOGIC</p>
+                <p style={{ color: '#ffffff' }} className="font-bold">SOLENOID VALVES</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================== */}
+      {/* SECTION 4: ADAPTIVE LIGHTING & AI PREDICTION */}
+      {/* ========================================================== */}
+      <section id="lighting-solution" className="relative py-28 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/10">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="order-2 lg:order-1 relative rounded-3xl overflow-hidden border border-amber-500/40 shadow-2xl bg-[#060b14]">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.05]"
+            >
+              <source src="/videos/adaptive-lighting.mp4" type="video/mp4" />
+              <source src="/videos/Adaptive Lighting.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute bottom-4 left-4 right-4 bg-black/90 backdrop-blur-md border border-white/20 p-4 rounded-xl font-mono text-xs flex justify-between">
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">LDR SENSOR</p>
+                <p className="text-amber-300 font-bold">AMBIENT RESPONSIVE</p>
+              </div>
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">ENERGY SAVED</p>
+                <p className="text-emerald-400 font-bold">18.4% MEASURED</p>
+              </div>
+              <div>
+                <p style={{ color: '#cbd5e1' }} className="text-[10px]">CONTROLLER</p>
+                <p style={{ color: '#ffffff' }} className="font-bold">ESP32 RELAYS</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-amber-400 font-bold flex items-center gap-2">
+              <Zap size={14} /> 03 • ADAPTIVE ENERGY CONSERVATION
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-5xl font-light text-white tracking-tight">
+              Dynamic Street Light Optimization
             </h2>
-            <p className="mx-auto mt-5 max-w-3xl leading-8 text-slate-400">
-              The landing page now leads with a real WebGL city experience while keeping the rest of the product deployment-safe and aligned to serious infrastructure software.
+            <p style={{ color: '#ffffff' }} className="mt-4 text-sm sm:text-base leading-relaxed font-normal">
+              LDR sensor inputs continuously detect ambient dusk and dawn transitions. Relay controls automatically trigger or dim luminaires, ensuring safety when needed while cutting unnecessary municipal grid consumption.
             </p>
 
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-7 py-3.5 font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300"
-              >
-                Enter Command Center
-              </Link>
-              <a
-                href="#system-preview"
-                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-7 py-3.5 font-semibold text-white transition hover:border-cyan-400/30 hover:bg-white/[0.07]"
-              >
-                Review Platform Layers
-              </a>
+            <div className="mt-8 grid sm:grid-cols-2 gap-4 font-mono text-xs">
+              <div className="bg-white/[0.05] border border-white/15 p-5 rounded-xl">
+                <p className="text-amber-300 font-bold text-sm">LDR Sensitivity</p>
+                <p style={{ color: '#f1f5f9' }} className="mt-2 font-sans text-xs leading-relaxed">
+                  Automatic threshold triggers eliminate human operational error and daytime burning.
+                </p>
+              </div>
+              <div className="bg-white/[0.05] border border-white/15 p-5 rounded-xl">
+                <p className="text-cyan-300 font-bold text-sm">ESP32 Autonomy</p>
+                <p style={{ color: '#f1f5f9' }} className="mt-2 font-sans text-xs leading-relaxed">
+                  Internal hardware timer backups execute schedules even during network dropouts.
+                </p>
+              </div>
             </div>
           </div>
-        </motion.section>
+        </div>
+      </section>
 
-        <footer className="border-t border-white/10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-sm text-slate-500 md:flex-row md:items-center md:justify-between md:px-8">
-            <p>RTC SMART CITY · Intelligent Water Distribution &amp; Adaptive Street Lighting</p>
-            <p>3D smart city digital twin landing experience</p>
+      {/* ========================================================== */}
+      {/* SECTION 5: FINAL CALL TO ACTION */}
+      {/* ========================================================== */}
+      <section className="relative py-28 overflow-hidden border-t border-white/10">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover filter brightness-[0.35] contrast-[1.1]"
+        >
+          <source src="/videos/final-hero.mp4" type="video/mp4" />
+          <source src="/videos/Final Hero.mp4" type="video/mp4" />
+        </video>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+          <p className="text-xs font-mono tracking-[0.3em] uppercase text-cyan-300 font-bold mb-3">
+            CENTRALIZED COMMAND
+          </p>
+          <h2 className="text-4xl sm:text-6xl font-light text-white tracking-tight">
+            Explore the Live Dashboard
+          </h2>
+          <p style={{ color: '#ffffff' }} className="mt-4 max-w-xl mx-auto text-sm sm:text-base leading-relaxed font-light">
+            Monitor real-time sensor streams, toggle motorized valves, configure RTC timing, and view PDF telemetry reports.
+          </p>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 font-mono text-xs">
+            <Link
+              href="/login"
+              className="w-full sm:w-auto rounded-xl bg-cyan-400 px-8 py-4 font-bold text-slate-950 tracking-wider hover:bg-cyan-300 transition hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] flex items-center justify-center gap-2"
+            >
+              LAUNCH OPERATOR ACCESS <ArrowRight size={16} />
+            </Link>
           </div>
-        </footer>
-      </div>
+        </div>
+      </section>
+
+      {/* Minimal Enterprise Footer */}
+      <footer className="border-t border-white/10 py-8 px-6 text-center font-mono text-xs text-slate-300 bg-[#02050a]">
+        RTC SMART CITY • Intelligent Water Distribution &amp; Adaptive Street Lighting System
+      </footer>
     </main>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="max-w-3xl">
-      <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-        {title}
-      </h2>
-      <p className="mt-5 leading-8 text-slate-400">{description}</p>
-    </div>
-  );
-}
-
-function FeaturePanel({
-  eyebrow,
-  title,
-  items,
-  accent,
-}: {
-  eyebrow: string;
-  title: string;
-  items: string[];
-  accent: 'cyan' | 'amber';
-}) {
-  const accentClass =
-    accent === 'cyan'
-      ? 'border-cyan-400/15 bg-cyan-400/5 text-cyan-300'
-      : 'border-amber-400/15 bg-amber-400/5 text-amber-300';
-
-  const dotClass = accent === 'cyan' ? 'bg-cyan-300' : 'bg-amber-300';
-
-  return (
-    <article className="rounded-[30px] border border-white/10 bg-[#0b1422]/88 p-6 shadow-glass backdrop-blur-xl sm:p-7">
-      <div className={`inline-flex rounded-full border px-3 py-1 text-xs uppercase tracking-[0.24em] ${accentClass}`}>
-        {eyebrow}
-      </div>
-      <h3 className="mt-5 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        {title}
-      </h3>
-
-      <div className="mt-8 space-y-4">
-        {items.map((item) => (
-          <div
-            key={item}
-            className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-          >
-            <div className={`mt-1.5 h-2.5 w-2.5 rounded-full ${dotClass}`} />
-            <p className="text-sm leading-7 text-slate-300">{item}</p>
-          </div>
-        ))}
-      </div>
-    </article>
-  );
-}
-
-function BrandMark() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-5 w-5 fill-none">
-      <path d="M16 4L26 10V22L16 28L6 22V10L16 4Z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M16 10V22M10 13.5L16 17L22 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
