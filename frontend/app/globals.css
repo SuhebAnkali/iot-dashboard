@@ -10,24 +10,34 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-base text-slate-100 transition-colors duration-300;
+  @apply bg-[#05070c] text-white transition-colors duration-300;
   font-family: var(--font-body);
+}
+
+/* Force high-contrast text on dark backgrounds */
+body:not(.light) p {
+  color: #f1f5f9;
 }
 
 body.light {
   @apply bg-base-light text-slate-800;
 }
 
+body.light p {
+  color: #334155;
+}
+
 /* Instrument-panel glass card */
 .panel-card {
-  @apply relative rounded-2xl border border-panel-border bg-panel/70 backdrop-blur-md shadow-glass;
+  @apply relative rounded-2xl border border-panel-border bg-panel/70 backdrop-blur-md shadow-glass text-white;
 }
 
 body.light .panel-card {
-  @apply border-panel-borderLight bg-white/70 shadow-none;
+  @apply border-panel-borderLight bg-white/70 shadow-none text-slate-900;
 }
 
 /* Small-caps gauge-style label */

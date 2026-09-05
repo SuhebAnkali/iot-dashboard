@@ -198,250 +198,388 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
- <div className="min-h-screen bg-base">
-  <Navbar
-  connected={connected}
-  hardwareOnline={dashboardData.deviceOnline}
-/>
+      <div className="min-h-screen bg-base text-white">
+        <Navbar
+          connected={connected}
+          hardwareOnline={dashboardData.deviceOnline}
+        />
 
-  <main className="min-h-screen px-4 pb-8 pt-24 sm:px-6 lg:ml-56 lg:px-6">
-    <div className="mx-auto max-w-[1600px]">
-        
-          <DashboardHeader
-            isOperator={isOperator}
-            userName={user?.name}
-            connected={connected}
-            updatedTime={updatedTime}
-          />
-
-          {!connected && (
-            <DeviceOfflineNotice
-              deviceOnline={dashboardData.deviceOnline}
-            />
-          )}
-
-          {(dashboardData.leakDetected ||
-            dashboardData.dryTank) && (
-            <div className="mt-5">
-              <AlertBanner
-                leakDetected={dashboardData.leakDetected}
-                dryTank={dashboardData.dryTank}
-              />
-            </div>
-          )}
-
-          <motion.section
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-          >
-            <SummaryCard
-              title="Tank Level"
-              value={`${dashboardData.tankPercentage.toFixed(1)}%`}
-              description={`${(
-                dashboardData.tankLevelMl / 1000
-              ).toFixed(2)} / 5.00 L`}
-              icon={<WaterIcon />}
-              status={
-                dashboardData.dryTank
-                  ? 'Critical'
-                  : dashboardData.tankPercentage < 25
-                    ? 'Low'
-                    : 'Normal'
-              }
-              statusType={
-                dashboardData.dryTank
-                  ? 'danger'
-                  : dashboardData.tankPercentage < 25
-                    ? 'warning'
-                    : 'success'
-              }
+        <main className="min-h-screen px-4 pb-8 pt-24 sm:px-6 lg:ml-56 lg:px-6">
+          <div className="mx-auto max-w-[1600px]">
+            <DashboardHeader
+              isOperator={isOperator}
+              userName={user?.name}
+              connected={connected}
+              updatedTime={updatedTime}
             />
 
-            <SummaryCard
-              title="Current Flow"
-              value={`${dashboardData.flowRateLpm.toFixed(2)}`}
-              unit="L/min"
-              description="YF-S201 outlet sensor"
-              icon={<FlowIcon />}
-              status={
-                dashboardData.flowRateLpm > 0
-                  ? 'Flowing'
-                  : 'No flow'
-              }
-              statusType={
-                dashboardData.flowRateLpm > 0
-                  ? 'success'
-                  : 'neutral'
-              }
-            />
-
-            <SummaryCard
-              title="Active Ward"
-              value={
-                dashboardData.activeWard > 0
-                  ? `Ward ${dashboardData.activeWard}`
-                  : 'None'
-              }
-              description={`${(
-                dashboardData.totalConsumptionMl / 1000
-              ).toFixed(2)} L distributed`}
-              icon={<WardIcon />}
-              status={
-                dashboardData.activeWard > 0
-                  ? 'Valve open'
-                  : 'Idle'
-              }
-              statusType={
-                dashboardData.activeWard > 0
-                  ? 'success'
-                  : 'neutral'
-              }
-            />
-
-            <SummaryCard
-              title="Street Lights"
-              value={
-                dashboardData.streetLight ? 'ON' : 'OFF'
-              }
-              description="Automatic LDR control"
-              icon={<LightIcon />}
-              status={
-                dashboardData.streetLight
-                  ? 'Active'
-                  : 'Inactive'
-              }
-              statusType={
-                dashboardData.streetLight
-                  ? 'success'
-                  : 'neutral'
-              }
-            />
-          </motion.section>
-
-          {loading ? (
-            <DashboardSkeleton />
-          ) : (
-            <motion.section
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.45, delay: 0.1 }}
-              className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12"
+            {/* ----------------- CINEMATIC DIGITAL TWIN LIVE FEED CARD ----------------- */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="mt-6"
             >
-              <div className="lg:col-span-4">
-                <SectionShell
-                  title="Tank Monitoring"
-                  subtitle="Current storage level"
-                  badge={
-                    dashboardData.dryTank
-                      ? 'Dry tank'
-                      : 'Live'
-                  }
-                  badgeType={
-                    dashboardData.dryTank
-                      ? 'danger'
-                      : 'success'
-                  }
-                >
-                  <TankGauge
-                    levelMl={dashboardData.tankLevelMl}
-                    dryTank={dashboardData.dryTank}
-                  />
-                </SectionShell>
-              </div>
+              <DigitalTwinLiveHero
+                connected={connected}
+                deviceOnline={dashboardData.deviceOnline}
+                tankPercentage={dashboardData.tankPercentage}
+                flowRateLpm={dashboardData.flowRateLpm}
+                activeWard={dashboardData.activeWard}
+                streetLight={dashboardData.streetLight}
+                leakDetected={dashboardData.leakDetected}
+              />
+            </motion.div>
 
-              <div className="lg:col-span-8">
-                <SectionShell
-                  title="Water Flow History"
-                  subtitle="Last six hours of sensor data"
-                  action={
-                    <span className="text-xs text-slate-500">
-                      Refreshes every 30 seconds
-                    </span>
-                  }
-                >
-                  <FlowChart history={history} />
-                </SectionShell>
-              </div>
+            {!connected && (
+              <DeviceOfflineNotice
+                deviceOnline={dashboardData.deviceOnline}
+              />
+            )}
 
-              <div className="lg:col-span-5">
-                <SectionShell
-                  title="Ward Consumption"
-                  subtitle="Distribution by area"
-                  badge={
-                    dashboardData.activeWard > 0
-                      ? `Ward ${dashboardData.activeWard} active`
-                      : 'No active ward'
-                  }
-                  badgeType={
-                    dashboardData.activeWard > 0
-                      ? 'success'
-                      : 'neutral'
-                  }
-                >
-                  <WardConsumption
-                    wards={wards}
-                    consumption={{
-                      ward1Ml: dashboardData.ward1Ml,
-                      ward2Ml: dashboardData.ward2Ml,
-                      ward3Ml: dashboardData.ward3Ml,
-                    }}
-                    activeWard={dashboardData.activeWard}
-                  />
-                </SectionShell>
-              </div>
-
-              <div className="lg:col-span-3">
-                <SectionShell
-                  title="Street Lighting"
-                  subtitle="LDR automation status"
-                >
-                  <StreetLightCard
-                    isOn={dashboardData.streetLight}
-                  />
-                </SectionShell>
-              </div>
-
-              <div className="lg:col-span-4">
-                <SystemStatusPanel
-                  connected={connected}
-                  deviceOnline={dashboardData.deviceOnline}
-                  schedulesAvailable={true}
-                  databaseAvailable={Boolean(live)}
-                  updatedTime={updatedTime}
+            {(dashboardData.leakDetected ||
+              dashboardData.dryTank) && (
+              <div className="mt-5">
+                <AlertBanner
+                  leakDetected={dashboardData.leakDetected}
+                  dryTank={dashboardData.dryTank}
                 />
               </div>
+            )}
 
-              <div className="lg:col-span-12">
-                <SectionShell
-                  title="Valve Control Centre"
-                  subtitle={
-                    isOperator
-                      ? 'Manual ward control is enabled'
-                      : 'Read-only system monitoring'
-                  }
-                  badge={
-                    isOperator
-                      ? 'Operator access'
-                      : 'Viewer access'
-                  }
-                  badgeType={
-                    isOperator ? 'success' : 'neutral'
-                  }
-                >
-                  <ValveControl
-                    wards={wards}
-                    activeWard={dashboardData.activeWard}
-                  />
-                </SectionShell>
-              </div>
+            <motion.section
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            >
+              <SummaryCard
+                title="Tank Level"
+                value={`${dashboardData.tankPercentage.toFixed(1)}%`}
+                description={`${(
+                  dashboardData.tankLevelMl / 1000
+                ).toFixed(2)} / 5.00 L`}
+                icon={<WaterIcon />}
+                status={
+                  dashboardData.dryTank
+                    ? 'Critical'
+                    : dashboardData.tankPercentage < 25
+                      ? 'Low'
+                      : 'Normal'
+                }
+                statusType={
+                  dashboardData.dryTank
+                    ? 'danger'
+                    : dashboardData.tankPercentage < 25
+                      ? 'warning'
+                      : 'success'
+                }
+              />
+
+              <SummaryCard
+                title="Current Flow"
+                value={`${dashboardData.flowRateLpm.toFixed(2)}`}
+                unit="L/min"
+                description="YF-S201 outlet sensor"
+                icon={<FlowIcon />}
+                status={
+                  dashboardData.flowRateLpm > 0
+                    ? 'Flowing'
+                    : 'No flow'
+                }
+                statusType={
+                  dashboardData.flowRateLpm > 0
+                    ? 'success'
+                    : 'neutral'
+                }
+              />
+
+              <SummaryCard
+                title="Active Ward"
+                value={
+                  dashboardData.activeWard > 0
+                    ? `Ward ${dashboardData.activeWard}`
+                    : 'None'
+                }
+                description={`${(
+                  dashboardData.totalConsumptionMl / 1000
+                ).toFixed(2)} L distributed`}
+                icon={<WardIcon />}
+                status={
+                  dashboardData.activeWard > 0
+                    ? 'Valve open'
+                    : 'Idle'
+                }
+                statusType={
+                  dashboardData.activeWard > 0
+                    ? 'success'
+                    : 'neutral'
+                }
+              />
+
+              <SummaryCard
+                title="Street Lights"
+                value={
+                  dashboardData.streetLight ? 'ON' : 'OFF'
+                }
+                description="Automatic LDR control"
+                icon={<LightIcon />}
+                status={
+                  dashboardData.streetLight
+                    ? 'Active'
+                    : 'Inactive'
+                }
+                statusType={
+                  dashboardData.streetLight
+                    ? 'success'
+                    : 'neutral'
+                }
+              />
             </motion.section>
-          )}
+
+            {loading ? (
+              <DashboardSkeleton />
+            ) : (
+              <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.45, delay: 0.1 }}
+                className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12"
+              >
+                <div className="lg:col-span-4">
+                  <SectionShell
+                    title="Tank Monitoring"
+                    subtitle="Current storage level"
+                    badge={
+                      dashboardData.dryTank
+                        ? 'Dry tank'
+                        : 'Live'
+                    }
+                    badgeType={
+                      dashboardData.dryTank
+                        ? 'danger'
+                        : 'success'
+                    }
+                  >
+                    <TankGauge
+                      levelMl={dashboardData.tankLevelMl}
+                      dryTank={dashboardData.dryTank}
+                    />
+                  </SectionShell>
+                </div>
+
+                <div className="lg:col-span-8">
+                  <SectionShell
+                    title="Water Flow History"
+                    subtitle="Last six hours of sensor data"
+                    action={
+                      <span className="text-xs text-slate-500">
+                        Refreshes every 30 seconds
+                      </span>
+                    }
+                  >
+                    <FlowChart history={history} />
+                  </SectionShell>
+                </div>
+
+                <div className="lg:col-span-5">
+                  <SectionShell
+                    title="Ward Consumption"
+                    subtitle="Distribution by area"
+                    badge={
+                      dashboardData.activeWard > 0
+                        ? `Ward ${dashboardData.activeWard} active`
+                        : 'No active ward'
+                    }
+                    badgeType={
+                      dashboardData.activeWard > 0
+                        ? 'success'
+                        : 'neutral'
+                    }
+                  >
+                    <WardConsumption
+                      wards={wards}
+                      consumption={{
+                        ward1Ml: dashboardData.ward1Ml,
+                        ward2Ml: dashboardData.ward2Ml,
+                        ward3Ml: dashboardData.ward3Ml,
+                      }}
+                      activeWard={dashboardData.activeWard}
+                    />
+                  </SectionShell>
+                </div>
+
+                <div className="lg:col-span-3">
+                  <SectionShell
+                    title="Street Lighting"
+                    subtitle="LDR automation status"
+                  >
+                    <StreetLightCard
+                      isOn={dashboardData.streetLight}
+                    />
+                  </SectionShell>
+                </div>
+
+                <div className="lg:col-span-4">
+                  <SystemStatusPanel
+                    connected={connected}
+                    deviceOnline={dashboardData.deviceOnline}
+                    schedulesAvailable={true}
+                    databaseAvailable={Boolean(live)}
+                    updatedTime={updatedTime}
+                  />
+                </div>
+
+                <div className="lg:col-span-12">
+                  <SectionShell
+                    title="Valve Control Centre"
+                    subtitle={
+                      isOperator
+                        ? 'Manual ward control is enabled'
+                        : 'Read-only system monitoring'
+                    }
+                    badge={
+                      isOperator
+                        ? 'Operator access'
+                        : 'Viewer access'
+                    }
+                    badgeType={
+                      isOperator ? 'success' : 'neutral'
+                    }
+                  >
+                    <ValveControl
+                      wards={wards}
+                      activeWard={dashboardData.activeWard}
+                    />
+                  </SectionShell>
+                </div>
+              </motion.section>
+            )}
           </div>
         </main>
       </div>
     </ProtectedRoute>
+  );
+}
+
+function DigitalTwinLiveHero({
+  connected,
+  deviceOnline,
+  tankPercentage,
+  flowRateLpm,
+  activeWard,
+  streetLight,
+  leakDetected,
+}: {
+  connected: boolean;
+  deviceOnline: boolean;
+  tankPercentage: number;
+  flowRateLpm: number;
+  activeWard: number;
+  streetLight: boolean;
+  leakDetected: boolean;
+}) {
+  return (
+    <div className="relative w-full h-72 sm:h-80 rounded-3xl overflow-hidden border border-white/10 bg-[#060b14] shadow-2xl">
+      {/* Background Breathing Living-City Video Loop */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0 filter brightness-[0.6] contrast-[1.1]"
+      >
+        <source src="/videos/command-center-loop.mp4" type="video/mp4" />
+        <source src="/videos/IdleLooping Command-Center shot.mp4" type="video/mp4" />
+      </video>
+
+      {/* Industrial Gradients and Vignette */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#050b14] via-black/20 to-black/60 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,11,20,0.8)_100%)] pointer-events-none" />
+
+      {/* Overlay Content */}
+      <div className="relative z-20 h-full p-6 flex flex-col justify-between font-mono">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3.5 py-1.5 text-xs text-white">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  connected
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-amber-400 animate-ping'
+                }`}
+              />
+              <span className="font-bold tracking-wider">
+                DIGITAL TWIN TELEMETRY STREAM
+              </span>
+            </div>
+
+            {leakDetected && (
+              <span className="rounded-full border border-rose-500/40 bg-rose-500/20 px-3 py-1 text-xs font-bold text-rose-300 animate-pulse">
+                AI ANOMALY DETECTED
+              </span>
+            )}
+          </div>
+
+          <Link
+            href="/digital-twin"
+            className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/40 bg-cyan-400/15 backdrop-blur-md px-4 py-2 text-xs font-bold tracking-wider text-cyan-300 transition hover:bg-cyan-400/25 hover:border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+          >
+            LAUNCH 3D DIGITAL TWIN TOUR →
+          </Link>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-cyan-300 font-semibold">
+              REALTIME MUNICIPAL INFRASTRUCTURE
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-light text-white tracking-tight mt-1 font-sans">
+              RTC Smart City Virtual Twin
+            </h2>
+          </div>
+
+          {/* Quick HUD Metrics */}
+          <div className="flex flex-wrap gap-4 text-xs">
+            <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md px-4 py-2.5">
+              <p className="text-[10px] text-slate-400">STORAGE LEVEL</p>
+              <p className="text-base font-bold text-cyan-300 mt-0.5">
+                {tankPercentage.toFixed(1)}%
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md px-4 py-2.5">
+              <p className="text-[10px] text-slate-400">FLOW VELOCITY</p>
+              <p
+                className={`text-base font-bold mt-0.5 ${
+                  flowRateLpm > 0 ? 'text-emerald-400' : 'text-slate-300'
+                }`}
+              >
+                {flowRateLpm.toFixed(2)} L/min
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md px-4 py-2.5">
+              <p className="text-[10px] text-slate-400">LIGHTING GRID</p>
+              <p
+                className={`text-base font-bold mt-0.5 ${
+                  streetLight ? 'text-amber-300' : 'text-slate-400'
+                }`}
+              >
+                {streetLight ? 'ADAPTIVE ON' : 'OFF'}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md px-4 py-2.5">
+              <p className="text-[10px] text-slate-400">DISTRIBUTION</p>
+              <p className="text-base font-bold text-white mt-0.5">
+                {activeWard > 0 ? `WARD 0${activeWard}` : 'BALANCED'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
