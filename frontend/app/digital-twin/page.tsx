@@ -1,7 +1,7 @@
 // app/digital-twin/page.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,9 +13,7 @@ import {
   Activity,
   Droplet,
   Zap,
-  CheckCircle2,
-  ChevronRight,
-  Maximize2
+  CheckCircle2
 } from "lucide-react";
 import { SCENES, SceneConfig } from "@/components/digital-twin/cinematicData";
 
@@ -33,10 +31,11 @@ export default function DigitalTwinPage() {
 
   // Cross-fade pre-buffered transition engine
   const transitionToScene = (nextIdx: number) => {
-    if (nextIdx >= SCENES.length) {
-      nextIdx = 0; // Loop or hold at final scene
+    let targetIdx = nextIdx;
+    if (targetIdx >= SCENES.length) {
+      targetIdx = 0; // Loop or hold at initial scene
     }
-    const nextScene = SCENES[nextIdx];
+    const nextScene = SCENES[targetIdx];
 
     if (activeVideoSlot === "A") {
       if (videoRefB.current) {
@@ -53,7 +52,7 @@ export default function DigitalTwinPage() {
         setActiveVideoSlot("A");
       }
     }
-    setCurrentSceneIdx(nextIdx);
+    setCurrentSceneIdx(targetIdx);
   };
 
   const handleVideoEnded = () => {
@@ -76,11 +75,11 @@ export default function DigitalTwinPage() {
 
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[#05070c] text-white select-none font-sans">
-      {/* ----------------- SEAMLESS VIDEO STACK ----------------- */}
+      {/* ----------------- SEAMLESS DUAL VIDEO STACK ----------------- */}
       <div className="absolute inset-0 z-0">
         <video
           ref={videoRefA}
-          src={SCENES[0].videoSrc}
+          src={SCENES[0]?.videoSrc || "/videos/city-overview.mp4"}
           autoPlay
           muted
           playsInline
@@ -100,15 +99,15 @@ export default function DigitalTwinPage() {
           }`}
         />
 
-        {/* Industrial Vignette and Color Grading Filter */}
-        <div className="absolute inset-0 pointer-events-none z-20 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,7,12,0.85)_100%)]" />
+        {/* Industrial Vignette Filter */}
+        <div className="absolute inset-0 pointer-events-none z-20 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(5,7,12,0.85)_100%)]" />
         <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(180deg,rgba(5,7,12,0.6)_0%,transparent_20%,transparent_80%,rgba(5,7,12,0.85)_100%)]" />
       </div>
 
       {/* ----------------- INTERACTIVE SPATIAL HUD CALLOUTS ----------------- */}
       <div className="absolute inset-0 z-30 pointer-events-none">
         <AnimatePresence mode="wait">
-          {currentScene.hudCallouts?.map((spot, i) => (
+          {currentScene?.hudCallouts?.map((spot, i) => (
             <motion.div
               key={`${currentScene.id}-${i}`}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -132,9 +131,9 @@ export default function DigitalTwinPage() {
                   />
                 </div>
 
-                <div className="bg-[#0b121e]/80 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded text-[11px] font-mono shadow-2xl transition-all duration-300 group-hover:border-cyan-400">
-                  <p className="text-white font-bold tracking-wider">{spot.label}</p>
-                  <p className="text-slate-400 text-[10px]">{spot.sublabel}</p>
+                <div className="bg-[#0b121e]/90 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded text-[11px] font-mono shadow-2xl transition-all duration-300 group-hover:border-cyan-400">
+                  <p style={{ color: "#ffffff" }} className="font-bold tracking-wider">{spot.label}</p>
+                  <p style={{ color: "#94a3b8" }} className="text-[10px]">{spot.sublabel}</p>
                 </div>
               </div>
             </motion.div>
@@ -150,84 +149,89 @@ export default function DigitalTwinPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs tracking-wider text-slate-300 hover:text-white transition"
+              style={{ color: "#f8fafc" }}
+              className="flex items-center gap-2 border border-white/20 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-lg text-xs tracking-wider hover:border-cyan-400 transition"
             >
               ← HOME
             </Link>
-            <div className="border-l border-white/10 pl-4">
-              <h1 className="text-sm font-bold tracking-[0.25em] text-cyan-300 font-mono">
+            <div className="border-l border-white/20 pl-4">
+              <h1 style={{ color: "#67e8f9" }} className="text-sm font-bold tracking-[0.25em] font-mono">
                 RTC SMART CITY // DIGITAL TWIN
               </h1>
-              <p className="text-[10px] text-slate-400 font-mono tracking-widest mt-0.5">
-                SCENE 0{currentScene.id} / 08 • {currentScene.title}
+              <p style={{ color: "#cbd5e1" }} className="text-[10px] font-mono tracking-widest mt-0.5">
+                SCENE 0{currentScene?.id || 1} / 08 • {currentScene?.title}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 font-mono text-xs">
-            <div className="bg-black/50 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-lg flex items-center gap-3">
+            <div className="bg-black/60 border border-white/20 backdrop-blur-md px-4 py-1.5 rounded-lg flex items-center gap-3">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-slate-300 text-[11px]">HARDWARE LINK: ACTIVE</span>
-              <span className="text-cyan-400 text-[11px] border-l border-white/10 pl-3">DEMO / SIMULATION</span>
+              <span style={{ color: "#f8fafc" }} className="text-[11px]">HARDWARE LINK: ACTIVE</span>
+              <span style={{ color: "#22d3ee" }} className="text-[11px] border-l border-white/20 pl-3">DEMO / SIMULATION</span>
             </div>
 
             <Link
               href="/login"
-              className="bg-cyan-400 hover:bg-cyan-300 text-black font-semibold px-4 py-1.5 rounded-lg text-xs transition"
+              className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition shadow-[0_0_15px_rgba(34,211,238,0.3)]"
             >
               COMMAND CENTER →
             </Link>
           </div>
         </header>
 
-        {/* Center Dynamic Alert Badge (Scene 4/6 Anomaly specific) */}
+        {/* Center Dynamic Alert Badge (Scene 4 / 6 Anomaly specific) */}
         <div className="flex items-center justify-end pointer-events-none pr-4">
           <AnimatePresence>
-            {(currentScene.id === 4 || currentScene.id === 6) && (
+            {(currentScene?.id === 4 || currentScene?.id === 6) && (
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
-                className="w-96 bg-[#0c121e]/90 border border-rose-500/50 backdrop-blur-xl rounded-2xl p-6 shadow-2xl font-mono pointer-events-auto"
+                className="w-96 bg-[#0c121e]/95 border border-rose-500/60 backdrop-blur-xl rounded-2xl p-6 shadow-2xl font-mono pointer-events-auto"
               >
                 <div className="flex items-center justify-between border-b border-rose-500/30 pb-3 mb-4">
                   <div className="flex items-center gap-2 text-rose-400">
                     <ShieldAlert size={18} />
-                    <span className="font-bold text-xs tracking-wider">AI DIAGNOSTIC EXCEPTION</span>
+                    <span style={{ color: "#fb7185" }} className="font-bold text-xs tracking-wider">
+                      AI DIAGNOSTIC EXCEPTION
+                    </span>
                   </div>
-                  <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded">CRITICAL</span>
+                  <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">
+                    CRITICAL
+                  </span>
                 </div>
 
                 <div className="space-y-2.5 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Anomaly Target:</span>
-                    <span className="text-white font-bold">Lateral Pipe Ward 02</span>
+                    <span style={{ color: "#cbd5e1" }}>Anomaly Target:</span>
+                    <span style={{ color: "#ffffff" }} className="font-bold">Lateral Pipe Ward 02</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Breach Probability:</span>
-                    <span className="text-rose-400 font-bold">89.4% (Acoustic Match)</span>
+                    <span style={{ color: "#cbd5e1" }}>Breach Probability:</span>
+                    <span style={{ color: "#fb7185" }} className="font-bold">89.4% (Acoustic Match)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Normal Expected Flow:</span>
-                    <span className="text-slate-300">3.0 L/min</span>
+                    <span style={{ color: "#cbd5e1" }}>Normal Expected Flow:</span>
+                    <span style={{ color: "#f8fafc" }}>3.0 L/min</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Observed Sensor Flow:</span>
-                    <span className="text-rose-400 font-bold">5.7 L/min (+90%)</span>
+                    <span style={{ color: "#cbd5e1" }}>Observed Sensor Flow:</span>
+                    <span style={{ color: "#fb7185" }} className="font-bold">5.7 L/min (+90%)</span>
                   </div>
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">Auto-containment:</span>
+                  <span style={{ color: "#cbd5e1" }} className="text-[11px]">Auto-containment:</span>
                   <button
                     onClick={() => {
                       setValveOverride(true);
-                      transitionToScene(6); // Trigger AI response / safe scene
+                      transitionToScene(6); // Jump to isolated scene
                     }}
-                    className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded text-xs transition flex items-center gap-1.5"
+                    className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded text-xs transition flex items-center gap-1.5 shadow-[0_0_15px_rgba(244,63,94,0.4)]"
                   >
                     <CheckCircle2 size={14} />
                     {valveOverride ? "VALVE V2 ISOLATED" : "EXECUTE SHUTOFF"}
@@ -242,77 +246,89 @@ export default function DigitalTwinPage() {
         <footer className="space-y-4 pointer-events-auto">
           {/* Telemetry Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 font-mono text-xs">
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl">
-              <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl">
+              <p style={{ color: "#94a3b8" }} className="text-[10px] flex items-center gap-1.5">
                 <Droplet size={12} className="text-cyan-400" /> TANK LEVEL
               </p>
-              <p className="text-lg font-light text-white mt-1">{currentScene.telemetry.tankLevel}</p>
+              <p style={{ color: "#ffffff" }} className="text-lg font-light mt-1">
+                {currentScene?.telemetry?.tankLevel || "78.4%"}
+              </p>
             </div>
 
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl">
-              <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl">
+              <p style={{ color: "#94a3b8" }} className="text-[10px] flex items-center gap-1.5">
                 <Activity size={12} className="text-cyan-400" /> FLOW VELOCITY
               </p>
               <p
-                className={`text-lg font-light mt-1 ${
-                  currentScene.telemetry.systemState === "CRITICAL" ? "text-rose-400 font-bold" : "text-white"
-                }`}
+                style={{
+                  color: currentScene?.telemetry?.systemState === "CRITICAL" ? "#fb7185" : "#ffffff",
+                }}
+                className="text-lg font-light mt-1"
               >
-                {currentScene.telemetry.flowRate}
+                {currentScene?.telemetry?.flowRate || "3.1 L/min"}
               </p>
             </div>
 
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl">
-              <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl">
+              <p style={{ color: "#94a3b8" }} className="text-[10px] flex items-center gap-1.5">
                 <Zap size={12} className="text-amber-400" /> STREET LIGHTS
               </p>
-              <p className="text-lg font-light text-white mt-1">{currentScene.telemetry.lightsActive}</p>
+              <p style={{ color: "#ffffff" }} className="text-lg font-light mt-1">
+                {currentScene?.telemetry?.lightsActive || "42 / 48"}
+              </p>
             </div>
 
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl">
-              <p className="text-[10px] text-slate-500">LINE PRESSURE</p>
-              <p className="text-lg font-light text-white mt-1">{currentScene.telemetry.pressure}</p>
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl">
+              <p style={{ color: "#94a3b8" }} className="text-[10px]">LINE PRESSURE</p>
+              <p style={{ color: "#ffffff" }} className="text-lg font-light mt-1">
+                {currentScene?.telemetry?.pressure || "4.2 BAR"}
+              </p>
             </div>
 
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl">
-              <p className="text-[10px] text-slate-500">GRID CONSUMPTION</p>
-              <p className="text-lg font-light text-white mt-1">{currentScene.telemetry.gridLoad}</p>
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl">
+              <p style={{ color: "#94a3b8" }} className="text-[10px]">GRID CONSUMPTION</p>
+              <p style={{ color: "#ffffff" }} className="text-lg font-light mt-1">
+                {currentScene?.telemetry?.gridLoad || "84 kW"}
+              </p>
             </div>
 
-            <div className="bg-black/60 border border-white/10 backdrop-blur-md p-3 rounded-xl flex flex-col justify-between">
-              <p className="text-[10px] text-slate-500">STATE</p>
+            <div className="bg-black/75 border border-white/20 backdrop-blur-md p-3 rounded-xl flex flex-col justify-between">
+              <p style={{ color: "#94a3b8" }} className="text-[10px]">STATE</p>
               <span
                 className={`text-xs px-2 py-0.5 rounded font-bold tracking-wider inline-block text-center ${
-                  currentScene.telemetry.systemState === "CRITICAL"
+                  currentScene?.telemetry?.systemState === "CRITICAL"
                     ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                    : currentScene.telemetry.systemState === "OPTIMIZED"
+                    : currentScene?.telemetry?.systemState === "OPTIMIZED"
                     ? "bg-amber-400/20 text-amber-300 border border-amber-400/30"
                     : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                 }`}
               >
-                {currentScene.telemetry.systemState}
+                {currentScene?.telemetry?.systemState || "NOMINAL"}
               </span>
             </div>
           </div>
 
           {/* Player & Scene Navigation Track */}
-          <div className="bg-black/70 border border-white/10 backdrop-blur-xl rounded-2xl p-3 flex items-center justify-between gap-4">
+          <div className="bg-black/80 border border-white/20 backdrop-blur-xl rounded-2xl p-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={togglePlayPause}
                 className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                aria-label={isPlaying ? "Pause tour" : "Play tour"}
               >
                 {isPlaying ? <Pause size={16} /> : <Play size={16} />}
               </button>
               <button
                 onClick={() => transitionToScene(0)}
-                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-300 hover:text-white transition"
+                aria-label="Restart tour"
               >
                 <RotateCcw size={16} />
               </button>
               <button
                 onClick={() => transitionToScene(currentSceneIdx + 1)}
-                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-300 hover:text-white transition"
+                aria-label="Next scene"
               >
                 <SkipForward size={16} />
               </button>
@@ -342,7 +358,7 @@ export default function DigitalTwinPage() {
                 className={`text-[11px] font-mono px-3 py-1.5 rounded-lg border transition ${
                   interactiveMode
                     ? "bg-cyan-400/20 border-cyan-400 text-cyan-300"
-                    : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                    : "bg-white/5 border-white/20 text-slate-300 hover:text-white"
                 }`}
               >
                 {interactiveMode ? "PAUSED ON TELEMETRY" : "AUTO-TOUR MODE"}
